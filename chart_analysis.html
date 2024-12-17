@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
-<body>
+<body onload="createViz()">
     <div class="container">
         <!-- Header -->
         <header>
@@ -17,13 +17,9 @@
         <!-- Controls -->
         <div class="controls">
             <div class="country-selector">
-                <label for="country">Select Country:</label>
-                <select id="country">
-                    <option value="US">United States</option>
-                    <option value="UK">United Kingdom</option>
-                    <option value="FR">France</option>
-                    <option value="DE">Germany</option>
-                    <!-- Add more countries as needed -->
+                <label for="country-list">Select Country:</label>
+                <select id="country-list" onload="updateSonglist()">
+                    <option value="">Loading...</option>
                 </select>
             </div>
 

@@ -1,13 +1,44 @@
-const ctx = {};
+const ctx = {
+    countries: [
+        "Global", "Argentina", "Australia", "Austria", "Belgium", "Bolivia", "Brazil", "Bulgaria",
+        "Canada", "Chile", "Colombia", "Costa Rica", "Czech Republic", "Denmark", 
+        "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Estonia", "Finland", 
+        "France", "Germany", "Greece", "Guatemala", "Honduras", "Hong Kong", 
+        "Hungary", "Iceland", "India", "Indonesia", "Ireland", "Israel", "Italy", "Japan", 
+        "Latvia", "Lithuania", "Luxembourg", "Malaysia", "Mexico", "Morocco", "Netherlands", 
+        "New Zealand", "Nicaragua", "Norway", "Panama", "Paraguay", "Peru", "Philippines", 
+        "Poland", "Portugal", "Romania", "Russia", "Saudi Arabia", "Singapore", "Slovakia", 
+        "South Africa", "South Korea", "Spain", "Sweden", "Switzerland", "Taiwan", "Thailand", 
+        "Turkey", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", 
+        "Uruguay", "Vietnam"
+    ]
+};
 
 
 function createViz() {
     console.log("Using D3 v" + d3.version);
+    updateSonglist();
 };
+
+
+function updateSonglist() {
+    const countryList = d3.select("#country-list");
+
+    // Clear existing options and add a default option
+    countryList.selectAll("option").remove();
+    countryList.append("option").attr("value", "").text("Select a country");
+
+    // Populate the select with sorted countries
+    ctx.countries.forEach(country => {
+        countryList.append("option")
+            .attr("value", country)
+            .text(country);
+    });
+}
 
 const sliderWidth = 600; // Width of the slider in pixels
 const startDate = new Date(2017, 0, 1); // Jan 1, 2017
-const endDate = new Date(2023, 11, 31); // Dec 31, 2023
+const endDate = new Date(2021, 11, 31); // Dec 31, 2023
 const totalDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)); // Total days in range
 
 // Create scales
@@ -49,6 +80,8 @@ const handles = svg.selectAll(".handle")
     .attr("class", "handle")
     .attr("r", 10)
     .attr("cx", (d) => xScale(d))
+    .style("fill", "#199b46")
+    .style("stroke", "#EEEEEE")
     .call(
         d3.drag()
             .on("drag", function (event, d) {
