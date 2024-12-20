@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Artist Detail</title>
+    <script type="text/javascript" src="js/d3.v7.min.js"></script>
+    <!-- Your code -->
+    <script type="text/javascript" src="js/artists.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: black;
+        margin: 0;
+        padding: 0;
+      }
+
+      svg {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 1400px;
+        height: 800px;
+      }
+
+      #back-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 10px 20px;
+        background-color: #50727b;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #back-button:hover {
+        background-color: #78a083;
+      }
+
+      .container {
+        text-align: center;
+        margin-top: 50px;
+      }
+
+      .artist-name {
+        font-size: 3em;
+        color: white;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <button id="back-button" onclick="goBack()">Back</button>
+    <div class="container">
+      <h1 class="artist-name" id="artist-name"></h1>
+    </div>
+    <svg id="layout">
+      <!-- First Quadrant: Artist ID -->
+      <g id="artist-id" transform="translate(0, 0)"></g>
+      <g id="attribute-viz" transform="translate(600, 0)"></g>
+
+      <!-- Second Quadrant: Top Songs & Top Artists -->
+      <g id="top-charts" transform="translate(700, 0)"></g>
+
+      <!-- Third Quadrant: Popularity Evolution -->
+      <g id="popularity-evolution" transform="translate(0, 400)"></g>
+
+      <!-- Fourth Quadrant: Reserved for other things -->
+      <g id="other" transform="translate(700, 400)" fill="#001F26">
+        <!-- Left Section -->
+        <!-- <g id="other-left" transform="translate(0, 0)">
+                <rect x="0" y="0" width="350" height="400"></rect>
+            </g> -->
+        <!-- Right Section -->
+        <!-- <g id="other-right" transform="translate(350, 0)">
+                <rect x="0" y="0" width="350" height="400" ></rect>
+            </g> -->
+        <g id="other-right">
+          <rect x="0" y="0" width="700" height="400" fill="#001F26"></rect>
+        </g>
+      </g>
+    </svg>
+    <script>
+      function goBack() {
+        window.history.back();
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const artistName = params.get("name");
+      const artistSpotifyId = params.get("spotify_id");
+
+      document.getElementById("artist-name").textContent =
+        artistName || "Unknown Artist";
+
+      if (!ctx.ARTIST_DATA || ctx.ARTIST_DATA.length === 0) {
+        loadData(artistName); // Load data if not already available
+      }
+    </script>
+  </body>
+</html>

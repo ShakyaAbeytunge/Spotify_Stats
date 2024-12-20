@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Spotify Music</title>
+    <!-- https://d3js.org/ -->
+    <script type="text/javascript" src="js/d3.v7.min.js"></script>
+    <script type="text/javascript" src="js/worldMusic.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-geo-projection@4"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: black;
+        color: white;
+        margin: 0;
+        padding: 0;
+      }
+      #main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 50px;
+      }
+
+      #main svg {
+        background-color: transparent;
+        margin-top: -70px;
+      }
+      svg {
+        display: block;
+        margin-left: 0;
+        margin-right: 0;
+      }
+      #color-scale {
+        margin-left: -30px;
+        color: #f0f0f0;
+      }
+      #controls-container {
+        text-align: center;
+        margin: 20px;
+      }
+      #features-container {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 200px; /* Adjust this value as needed */
+        left: 1150px; /* Position next to the map */
+        padding: 10px;
+      }
+
+      .feature-box {
+        padding: 10px;
+        margin: 6px;
+        cursor: pointer;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        color: black;
+        border-radius: 5px;
+        text-align: center;
+        transition: background-color 0.3s ease;
+      }
+
+      .feature-box:hover {
+        background-color: #cccccc; /* Change color when mouse hovers */
+      }
+      .feature-box.selected {
+        background-color: #4caf50; /* Change to your desired color */
+        color: white; /* Change the text color for the selected box */
+      }
+      .country-selector label,
+      .time-slider label {
+        font-weight: bold;
+        color: #ffffff;
+        margin-right: 10px;
+      }
+
+      .country-selector select {
+        padding: 5px;
+        border-radius: 5px;
+        border: none;
+      }
+
+      .time-slider input[type="range"] {
+        width: 1000px;
+        margin: 0 10px;
+      }
+      /* Time slider container */
+      .slider-container {
+        position: relative;
+        width: 100%;
+        margin: 20px 0;
+      }
+
+      .handle {
+        width: 10px;
+        height: 10px;
+        background-color: #3a9d5b;
+        border-radius: 50%;
+        position: absolute;
+        top: -7px;
+        cursor: pointer;
+      }
+
+      .range {
+        height: 5px;
+        background-color: #1db954;
+        position: absolute;
+        top: 0;
+      }
+
+      /* Custom range styles */
+
+      .slider-container input[type="range"]::-webkit-slider-thumb {
+        pointer-events: auto;
+        position: relative;
+        z-index: 2;
+        height: 10px;
+        width: 10px;
+        background-color: #1db954;
+        border-radius: 50%;
+        cursor: pointer;
+        -webkit-appearance: none;
+      }
+
+      .slider-container input[type="range"]::-moz-range-thumb {
+        pointer-events: auto;
+        height: 20px;
+        width: 20px;
+        background-color: #1db954;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+
+      .slider-container input[type="range"]::-ms-thumb {
+        pointer-events: auto;
+        height: 20px;
+        width: 20px;
+        background-color: #1db954;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+
+      .date-display {
+        font-size: 1rem;
+        color: #1db954;
+        font-weight: bold;
+        display: flex;
+        justify-content: center; /* Centers the content horizontally */
+        align-items: center; /* Centers the content vertically */
+        white-space: nowrap;
+      }
+
+      #selected-date {
+        font-weight: bold;
+        color: #1db954;
+      }
+      .time-slider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      h2 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+      }
+      h4 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #graph {
+        display: inline;
+        align-items: center;
+        justify-content: center;
+      }
+      #toggleBt {
+        background-color: white;
+        color: #1db954;
+        padding: 15 15;
+        text-align: center;
+        font: 1em sans-serif;
+        border: 1px solid #1db954;
+        border-radius: 5%;
+      }
+      form {
+        margin-bottom: 100px;
+        margin-right: 20px;
+      }
+    </style>
+  </head>
+
+  <body onload="createViz()">
+    <h2>Spotify on World</h2>
+
+    <div style="float: right">
+      <form>
+        <input
+          type="button"
+          value="Artist Visualization"
+          onclick="window.location.href='project.html';"
+          id="toggleBt"
+        />
+      </form>
+    </div>
+    <div id="graph">
+      <div id="main">
+        <div id="color-scale"></div>
+      </div>
+      <div class="time-slider">
+        <div id="slider">
+          <label>Time Period</label>
+          <div class="date-display">
+            <span id="start-date">Jan 2017</span> —
+            <span id="end-date">Dec 2021</span>
+          </div>
+        </div>
+      </div>
+      <h4>Top 200 Global songs choosing feature Evolution</h4>
+      <div id="chart"></div>
+    </div>
+  </body>
+</html>

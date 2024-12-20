@@ -1,53 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Spotify Chart Analysis</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
     <script src="js/d3.v7.min.js"></script>
-</head>
-<body onload="createViz()">
+  </head>
+  <body onload="createViz()">
     <div class="container">
-        <!-- Header -->
-        
+      <form>
+        <input
+          type="button"
+          value="World Music Visualization"
+          onclick="window.location.href='worldMusic.html';"
+          id="toggleBt"
+        />
+      </form>
 
-        <!-- Controls -->
-        <div class="controls">
-            <header>
-                <h1>Spotify  Top200 Charts</h1>
-            </header>
-            <div class="selector">
-                <label for="country-list">Select Country:</label>
-                <select id="country-list" onload="updateSonglist()">
-                </select>
-            </div>
-
-            <div class="time-slider">
-                <label>Select Time Period:</label>
-                <div id="slider"></div>
-                <div class="date-display">
-                    <span id="start-date">2017-01-01</span> — <span id="end-date">2023-12-31</span>
-                </div>
-            </div>
-            
+      <!-- Controls -->
+      <div class="controls">
+        <header>
+          <h1>Spotify Top200 Charts</h1>
+        </header>
+        <div class="selector">
+          <label for="country-list">Select Country:</label>
+          <select id="country-list" onload="updateSonglist()"></select>
         </div>
 
-        <!-- Tabs for Analysis -->
-        <div class="tabs">
-            <button class="tab-button active" data-tab="song-analysis">Song Analysis</button>
-            <button class="tab-button" data-tab="attribute-analysis">Atrribute Analysis</button>
-            <button class="tab-button" data-tab="artist-analysis">Artist Analysis</button>
+        <div class="time-slider">
+          <label>Select Time Period:</label>
+          <div id="slider"></div>
+          <div class="date-display">
+            <span id="start-date">2017-01-01</span> —
+            <span id="end-date">2023-12-31</span>
+          </div>
         </div>
+      </div>
 
-        <!-- Plots -->
-        <div class="plot-container">
-            <div class="plot active" id="song-analysis"></div>
-            <div class="plot" id="attribute-analysis"></div>
-            <div id="artist-analysis" class="plot"></div>
-        </div>
+      <!-- Tabs for Analysis -->
+      <div class="tabs">
+        <button class="tab-button active" data-tab="song-analysis">
+          Song Analysis
+        </button>
+        <button class="tab-button" data-tab="attribute-analysis">
+          Atrribute Analysis
+        </button>
+        <button class="tab-button" data-tab="artist-analysis">
+          Artist Analysis
+        </button>
+      </div>
+
+      <!-- Plots -->
+      <div class="plot-container">
+        <div class="plot active" id="song-analysis"></div>
+        <div class="plot" id="attribute-analysis"></div>
+        <div id="artist-analysis" class="plot"></div>
+      </div>
     </div>
 
     <script src="js/main.js"></script>
-</body>
+  </body>
 </html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSC_51052 - 2024 - Lab 06-1</title>
+    <!-- https://d3js.org/ -->
+    <script type="text/javascript" src="js/d3.v7.min.js"></script>
+    <!-- Your code -->
+    <script type="text/javascript" src="js/artists.js"></script>
+    <style type="text/css">
+      body {
+        background-color: black;
+        font-family: Arial, sans-serif;
+      }
+
+      svg {
+        display: block;
+        background-color: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: auto;
+        margin-right: auto;
+        width: 1200px;
+        height: 800px;
+      }
+
+      #collaborationG path,
+      #routeG line {
+        stroke: #555;
+        fill: none;
+        border: 1px solid blue;
+      }
+
+      #artistG circle {
+        stroke: #333;
+        stroke-width: 1px;
+        border: 1px solid red;
+      }
+
+      .state {
+        stroke: white;
+        stroke-width: 1px;
+        fill: #eee;
+      }
+
+      .counts {
+        margin-top: 0.4em;
+        width: 100%;
+        font-family: Arial;
+        font-size: 60%;
+        font-weight: normal;
+        color: #aaa;
+        text-align: center;
+      }
+
+      #suggestions {
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ccc;
+        max-height: 100px;
+        overflow-y: auto;
+        width: 50%;
+        margin: auto;
+        z-index: 1000;
+        margin-left: 25%;
+      }
+
+      .suggestion-item {
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+
+      .suggestion-item:hover {
+        background-color: #f0f0f0;
+      }
+      #toggleBt {
+        background-color: white;
+        color: #1db954;
+        padding: 15 15;
+        text-align: center;
+        font: 1em sans-serif;
+        border: 1px solid #1db954;
+        border-radius: 5%;
+        position: absolute;
+        margin-top: -50px;
+      }
+      #intro {
+        display: inline;
+        justify-content: center;
+        align-items: center;
+        color: white;
+      }
+      h2 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin-top: 100px;
+      }
+      p {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+      }
+      #search-bar {
+        width: 300px;
+        height: 30px;
+        background-color: white;
+        color: #1db954;
+        margin-left: 30px;
+        margin-top: 50px;
+        margin-bottom: 70px;
+      }
+      #search-bar::placeholder {
+        color: #1db954;
+        opacity: 1;
+      }
+      button {
+        color: white;
+        background-color: #1db954;
+        border-radius: 7px;
+        width: 80px;
+        padding: 10px 10px;
+        margin-left: 30px;
+      }
+    </style>
+  </head>
+
+  <body onload="createViz()">
+    <form>
+      <input
+        type="button"
+        value="World Music Visualization"
+        onclick="window.location.href='worldMusic.html';"
+        id="toggleBt"
+      />
+    </form>
+    <div id="intro">
+      <h2>Artist collaboration Graph</h2>
+      <p>
+        Search for an artist and explore their network. Click on an artist to
+        see details about them
+      </p>
+    </div>
+    <div id="whole" style="text-align: center; margin-bottom: 10px">
+      <input
+        id="search-bar"
+        type="text"
+        placeholder="Search for an artist..."
+        oninput="filterArtists()"
+      />
+      <button onclick="highlightArtist()">Search</button>
+      <div id="main" fill="#001F26">
+        <div id="suggestions"></div>
+      </div>
+    </div>
+  </body>
+</html>

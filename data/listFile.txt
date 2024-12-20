@@ -1,0 +1,69 @@
+﻿Argentina.csv
+Australia.csv
+Austria.csv
+Belgium.csv
+Bolivia.csv
+Brazil.csv
+Bulgaria.csv
+Canada.csv
+Chile.csv
+Colombia.csv
+Costa Rica.csv
+Czech Republic.csv
+Denmark.csv
+Dominican Republic.csv
+Ecuador.csv
+Egypt.csv
+El Salvador.csv
+Estonia.csv
+Finland.csv
+France.csv
+Germany.csv
+Global.csv
+Greece.csv
+Guatemala.csv
+Honduras.csv
+Hong Kong.csv
+Hungary.csv
+Iceland.csv
+India.csv
+Indonesia.csv
+Ireland.csv
+Israel.csv
+Italy.csv
+Japan.csv
+Latvia.csv
+Lithuania.csv
+Luxembourg.csv
+Malaysia.csv
+Mexico.csv
+Morocco.csv
+Netherlands.csv
+New Zealand.csv
+Nicaragua.csv
+Norway.csv
+Panama.csv
+Paraguay.csv
+Peru.csv
+Philippines.csv
+Poland.csv
+Portugal.csv
+Romania.csv
+Russia.csv
+Saudi Arabia.csv
+Singapore.csv
+Slovakia.csv
+South Africa.csv
+South Korea.csv
+Spain.csv
+Sweden.csv
+Switzerland.csv
+Taiwan.csv
+Thailand.csv
+Turkey.csv
+Ukraine.csv
+United Arab Emirates.csv
+United Kingdom.csv
+United States.csv
+Uruguay.csv
+Vietnam.csv

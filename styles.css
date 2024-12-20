@@ -1,266 +1,270 @@
 /* styles.css */
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #121212;
-    color: #FFFFFF;
-    margin: 0;
-    padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
 }
 
 .container {
-    margin: 0 auto;
-    padding: 20px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 header {
-    text-align: center;
-    margin-bottom: 20px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 header h1 {
-    color: #1DB954;
-    font-size: 2em;
+  color: #1db954;
+  font-size: 2em;
 }
 
 .controls {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  align-items: center;
 }
 
-.selector label, 
+.selector label,
 .time-slider label {
-    font-weight: bold;
-    color: #FFFFFF;
-    margin-right: 10px;
+  font-weight: bold;
+  color: #ffffff;
+  margin-right: 10px;
 }
 
 .selector select {
-    padding: 5px;
-    border-radius: 5px;
-    border: none;
+  padding: 5px;
+  border-radius: 5px;
+  border: none;
 }
 
 .time-slider input[type="range"] {
-    width: 200px;
-    margin: 0 10px;
+  width: 200px;
+  margin: 0 10px;
 }
 /* Time slider container */
 .slider-container {
-    position: relative;
-    width: 100%;
-    margin: 20px 0;
+  position: relative;
+  width: 100%;
+  margin: 20px 0;
 }
 
-
 .handle {
-    width: 20px;
-    height: 20px;
-    background-color: #199b46;
-    border-radius: 50%;
-    position: absolute;
-    top: -7px;
-    cursor: pointer;
+  width: 20px;
+  height: 20px;
+  background-color: #199b46;
+  border-radius: 50%;
+  position: absolute;
+  top: -7px;
+  cursor: pointer;
 }
 
 .range {
-    height: 6px;
-    background-color: #1DB954;
-    position: absolute;
-    top: 0;
+  height: 6px;
+  background-color: #1db954;
+  position: absolute;
+  top: 0;
 }
-
 
 /* Custom range styles */
 .slider-container input[type="range"]::-webkit-slider-thumb {
-    pointer-events: auto;
-    position: relative;
-    z-index: 2;
-    height: 20px;
-    width: 20px;
-    background-color: #1DB954;
-    border-radius: 50%;
-    cursor: pointer;
-    -webkit-appearance: none;
+  pointer-events: auto;
+  position: relative;
+  z-index: 2;
+  height: 20px;
+  width: 20px;
+  background-color: #1db954;
+  border-radius: 50%;
+  cursor: pointer;
+  -webkit-appearance: none;
 }
 
 .slider-container input[type="range"]::-moz-range-thumb {
-    pointer-events: auto;
-    height: 20px;
-    width: 20px;
-    background-color: #1DB954;
-    border-radius: 50%;
-    cursor: pointer;
+  pointer-events: auto;
+  height: 20px;
+  width: 20px;
+  background-color: #1db954;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .slider-container input[type="range"]::-ms-thumb {
-    pointer-events: auto;
-    height: 20px;
-    width: 20px;
-    background-color: #1DB954;
-    border-radius: 50%;
-    cursor: pointer;
+  pointer-events: auto;
+  height: 20px;
+  width: 20px;
+  background-color: #1db954;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .date-display {
-    font-size: 1rem;
-    color: #1DB954;
-    text-align: center;
-    font-weight: bold;
+  font-size: 1rem;
+  color: #1db954;
+  text-align: center;
+  font-weight: bold;
 }
 
-
 #selected-date {
-    font-weight: bold;
-    color: #1DB954;
+  font-weight: bold;
+  color: #1db954;
 }
 
 .tabs {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
 .tab-button {
-    padding: 10px 20px;
-    margin: 0 5px;
-    border: none;
-    border-radius: 5px;
-    background-color: #282828;
-    color: #FFFFFF;
-    cursor: pointer;
-    font-weight: bold;
+  padding: 10px 20px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 5px;
+  background-color: #282828;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .tab-button.active {
-    background-color: #1DB954;
+  background-color: #1db954;
 }
 
 .plot-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .plot {
-    width: 100%;
-    height: 400px;
-    display: none;
+  width: 100%;
+  height: 400px;
+  display: none;
 }
 
 .plot.active {
-    display: block;
+  display: block;
 }
 
 /* Flexbox container */
 .artist-container {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    padding: 20px;
-    height: 500px;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding: 20px;
+  height: 500px;
 }
 
 /* Left Panel: Artist List and Dropdown */
 .artist-left-panel {
-    width: 20%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .artist-left-panel label {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .dropdown {
-    padding: 5px;
-    font-size: 14px;
+  padding: 5px;
+  font-size: 14px;
 }
 
 .addButton {
-    padding: 5px 10px;
-    font-size: 14px;
-    background-color: #1DB954;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 14px;
+  background-color: #1db954;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
 .addButton:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .listContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 /* Artist tags */
 .artist-tag {
-    background-color: #e6f7ff;
-    border: 1px solid #b3e0ff;
-    color: #004085;
-    padding: 5px 10px;
-    position: relative; /* Relative position for 'x' */
-    display: inline-block;
-    border-radius: 15px;
-    font-size: 12px;
-    margin: 5px;
-    min-width: 100px;
-    text-align: center;
+  background-color: #e6f7ff;
+  border: 1px solid #b3e0ff;
+  color: #004085;
+  padding: 5px 10px;
+  position: relative; /* Relative position for 'x' */
+  display: inline-block;
+  border-radius: 15px;
+  font-size: 12px;
+  margin: 5px;
+  min-width: 100px;
+  text-align: center;
 }
 
 /* 'x' button positioned at the corner */
 .remove-tag {
-    position: absolute;
-    top: -5px; /* Adjust upward */
-    right: -5px; /* Adjust to the right */
-    background-color: #ff4d4f;
-    color: white;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
-    font-size: 10px;
-    font-weight: bold;
-    text-align: center;
-    cursor: pointer;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-    user-select: none; /* Prevent accidental text selection */
+  position: absolute;
+  top: -5px; /* Adjust upward */
+  right: -5px; /* Adjust to the right */
+  background-color: #ff4d4f;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  user-select: none; /* Prevent accidental text selection */
 }
 
 .remove-tag:hover {
-    background-color: #d9363e;
+  background-color: #d9363e;
 }
-
 
 /* Right Panel: Plot */
 .artist-right-panel {
-    width: 80%;
-    background-color: #1f1f1f;
-    border: 1px solid #cacaca;
-    border-radius: 8px;
-    padding: 10px;
-    position: relative;
+  width: 80%;
+  background-color: #1f1f1f;
+  border: 1px solid #cacaca;
+  border-radius: 8px;
+  padding: 10px;
+  position: relative;
 }
 
 .artist-right-panel svg {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 #attribute-analysis-svg {
-    position: absolute;
-    top: 70%; /* Adjust this value to place it below the content */
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #333; /* Optional for visibility */
-    border-radius: 10px; /* Optional for aesthetics */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Optional for depth */
+  position: absolute;
+  top: 70%; /* Adjust this value to place it below the content */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #333; /* Optional for visibility */
+  border-radius: 10px; /* Optional for aesthetics */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Optional for depth */
+}
+input {
+  color: white;
+  background-color: #1db954;
+  border-radius: 7px;
+  width: 180px;
+  padding: 10px 10px;
+  margin-left: 80%;
 }
