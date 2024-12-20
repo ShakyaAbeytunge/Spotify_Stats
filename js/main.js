@@ -24,6 +24,14 @@ const ctx = {
         "#ffbf00",  // Yellow-Orange
         "#d9ed00"   // Yellow-Greenish
     ],
+    attributes: [
+        "af_danceability",
+        "af_energy",
+        "af_speechiness",
+        "af_acousticness",
+        "af_valence",
+        "af_tempo",
+    ],
     maxOptions: 10,// Maximum artists to be added
     addedArtists: new Set(),
     addedSongs: new Set(),
@@ -69,13 +77,15 @@ function updateCountrylist() {
     countryList.on("change", () => {
         const selectedCountry = countryList.node().value;
         const [startDays, endDays] = handles.data().sort(d3.ascending);
-        const startDate = new Date(startDate);
-        const endDate = new Date(startDate);
+
+        // Use the globally declared startDate and endDate
+        const startDateCurrent = new Date(startDate);
+        const endDateCurrent = new Date(startDate);
+
+        startDateCurrent.setDate(startDate.getDate() + startDays);
+        endDateCurrent.setDate(startDate.getDate() + endDays);
     
-        startDate.setDate(startDate.getDate() + startDays);
-        endDate.setDate(startDate.getDate() + endDays);
-    
-        handleFilterChange(selectedCountry, startDate, endDate);
+        handleFilterChange(selectedCountry, startDateCurrent, endDateCurrent);
     });
 }
 
@@ -87,11 +97,6 @@ function handleFilterChange(selectedCountry, startDate, endDate) {
 
     // Load data for the selected country and date range
     loadCountryDataFiles(selectedCountry, startDate, endDate);
-    if (this.dataset.tab === "artist-analysis") {
-        updateArtistPlot();
-    } else if (this.dataset.tab === "song-analysis"){
-        updateSongPlot();
-    }
 }
 
 const sliderWidth = 600; // Width of the slider in pixels
@@ -207,6 +212,8 @@ tabs.forEach((tab) => {
         } else if (this.dataset.tab === "song-analysis" && !isSongDropdownInitialized){
             createSongDropdown("../data/top_5000_tracks.csv");
             isSongDropdownInitialized = true
+        } else if (this.dataset.tab === "attribute-analysis"){
+            updateAttributeAnalysis();
         }
     });
 });
@@ -214,23 +221,23 @@ tabs.forEach((tab) => {
 // D3.js for plotting
 function initializePlots() {
     // const songAnalysis = d3.select("#song-analysis");
-    const genreAnalysis = d3.select("#genre-analysis");
+    // const genreAnalysis = d3.select("#genre-analysis");
     
     
     createSongDropdown("../data/top_5000_tracks.csv");
     isSongDropdownInitialized = true; // Prevent re-initialization
     
     
-    genreAnalysis.append("svg")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .append("text")
-        .attr("x", "50%")
-        .attr("y", "50%")
-        .attr("text-anchor", "middle")
-        .style("fill", "#1DB954")
-        .style("font-size", "24px")
-        .text("Genre Analysis Chart Placeholder");
+    // genreAnalysis.append("svg")
+    //     .attr("width", "100%")
+    //     .attr("height", "100%")
+    //     .append("text")
+    //     .attr("x", "50%")
+    //     .attr("y", "50%")
+    //     .attr("text-anchor", "middle")
+    //     .style("fill", "#1DB954")
+    //     .style("font-size", "24px")
+    //     .text("Genre Analysis Chart Placeholder");
 
 }
 
@@ -465,20 +472,29 @@ function updateSongPlot() {
             .transition()
             .duration(2000)
             .ease(d3.easeLinear)
-            .attr("stroke-dashoffset", 0);
+            .attr("stroke-dashoffset", 0)
+            .on("end", () => {
+                // Add circles after the line is drawn
+            const circles = content.selectAll(`.circle-${sanitizeClassName(song)}`)
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("cx", d => xScale(d.date))
+                .attr("cy", d => yScale(d.rank))
+                .attr("r", 3)
+                .attr("fill", colorScale(song))
+                .style("opacity", 0) // Start with opacity 0
+                .attr("class", `circle-${sanitizeClassName(song)}`)
+                .append("title")
+                .text(d => `Song: ${song.split('-').slice(1).join('-')}\nDate: ${d3.timeFormat("%b %d, %Y")(d.date)}\nRank Score: ${d.rank}`);
 
-        content.selectAll(`.circle-${sanitizeClassName(song)}`)
-            .data(data)
-            .enter()
-            .append("circle")
-            .attr("cx", d => xScale(d.date))
-            .attr("cy", d => yScale(d.rank))
-            .attr("r", 3)
-            .attr("fill", colorScale(song))
-            .style("opacity", 0.8)
-            .attr("class", `circle-${sanitizeClassName(song)}`)
-            .append("title")
-            .text(d => `Song: ${song.split('-').slice(1).join('-')}\nDate: ${d3.timeFormat("%b %d, %Y")(d.date)}\nRank Score: ${d.rank}`);        
+            // Smoothly transition circles to visible
+            content.selectAll(`.circle-${sanitizeClassName(song)}`)
+                .transition()
+                .duration(1000)
+                .ease(d3.easeLinear)
+                .style("opacity", 0.8); // Transition to visible
+                });      
     });
 
     const legendX = width + margin.left - 200; // Adjust for legend width
@@ -783,27 +799,34 @@ function updateArtistPlot() {
             .transition()
             .duration(2000)
             .ease(d3.easeLinear)
-            .attr("stroke-dashoffset", 0);
+            .attr("stroke-dashoffset", 0)
+            .on("end", () => {
 
-        content.selectAll(`circle-${artist.replace(/\s+/g, "")}`)
-            .data(data)
-            .enter()
-            .append("circle")
-            .attr("cx", d => xScale(d.date))
-            .attr("cy", d => yScale(d.streams))
-            .attr("r", 3)
-            .attr("fill", colorScale(artist))
-            .style("opacity", 0.8)
-            .attr("class", `circle-${artist.replace(/\s+/g, "")}`)
-            .append("title")
-            .text(d => `Artist: ${artist}\nDate: ${d3.timeFormat("%b %d, %Y")(d.date)}\nStreams: ${d.streams}`);
+                content.selectAll(`circle-${artist.replace(/\s+/g, "")}`)
+                    .data(data)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", d => xScale(d.date))
+                    .attr("cy", d => yScale(d.streams))
+                    .attr("r", 3)
+                    .attr("fill", colorScale(artist))
+                    .style("opacity", 0)
+                    .attr("class", `circle-${artist.replace(/\s+/g, "")}`)
+                    .append("title")
+                    .text(d => `Artist: ${artist}\nDate: ${d3.timeFormat("%b %d, %Y")(d.date)}\nStreams: ${d.streams}`);
+
+                // Smoothly transition circles to visible
+                content.selectAll(`.circle-${artist.replace(/\s+/g, "")}`)
+                    .transition()
+                    .duration(1000)
+                    .ease(d3.easeLinear)
+                    .style("opacity", 0.8); // Transition to visible
+                });        
     });
 
-    const legendX = width + margin.left - 150; // Adjust for legend width
-    const legendY = svgHeight - margin.bottom - (addedSongsArray.length * 30) - 10; // Adjust for legend height
 
     const legend = svg.append("g")
-        .attr("transform", `translate(${legendX}, ${legendY})`);
+        .attr("transform", `translate(${width - 150}, ${margin.top})`);
 
     addedArtistsArray.forEach((artist, index) => {
         const legendItem = legend.append("g")
@@ -831,6 +854,8 @@ function updateArtistPlot() {
             .attr("x", 25)
             .attr("y", 15)
             .style("fill", colorScale(artist))
+            .style("font-size", "12px") // Reduce font size
+            .style("font-family", "Arial, sans-serif")
             .text(artist);
     });
 
@@ -852,6 +877,185 @@ function updateArtistPlot() {
         });
 
     svg.call(zoom);
+}
+
+function updateAttributeAnalysis() {
+    // Clear previous plot
+    d3.select("#attribute-analysis").selectAll("*").remove();
+
+    const svgWidth = 1150;
+    const svgHeight = 600;
+    const margin = { top: 60, right: 50, bottom: 100, left: 150 };
+    const width = svgWidth - margin.left - margin.right;
+    const height = svgHeight - margin.top - margin.bottom;
+
+    const attributes = ctx.attributes;
+
+    // Prepare SVG container
+    const svg = d3.select("#attribute-analysis")
+        .append("svg")
+        .attr("id", "attribute-analysis-svg")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight);
+
+    const chart = svg.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Preprocessing
+    const parseDate = d3.timeParse("%Y-%m-%d");
+    const formatMonth = d3.timeFormat("%b %Y");
+
+    // Create a map for fast song data lookups
+    const songDataMap = new Map(ctx.songData.map(song => [song.track_id, song]));
+
+    // Group by month and calculate weighted averages
+    const monthlyData = d3.rollups(
+        ctx.chartData,
+        v => {
+            const rankMap = d3.rollup(
+                v,
+                d => d3.mean(d, d => d.rank),
+                d => d.track_id
+            );
+
+            // Precompute weighted averages
+            const attributeAverages = attributes.map(attr => {
+                let weightedSum = 0;
+                let totalWeight = 0;
+
+                rankMap.forEach((meanRank, trackId) => {
+                    const song = songDataMap.get(trackId);
+                    if (!song) return;
+
+                    const weight = 201 - meanRank;
+                    weightedSum += weight * song[attr];
+                    totalWeight += weight;
+                });
+
+                return weightedSum / (totalWeight || 1); // Avoid division by zero
+            });
+
+            return Object.fromEntries(attributes.map((attr, i) => [attr, attributeAverages[i]]));
+        },
+        d => formatMonth(parseDate(d.date))
+    );
+
+    // Calculate min and max for normalization
+    const attributeRanges = attributes.map(attr => {
+        const values = monthlyData.map(([, values]) => values[attr]);
+        return { attr, min: d3.min(values), max: d3.max(values) };
+    });
+
+    // Normalize data
+    const normalizedData = monthlyData.map(([month, values]) => {
+        const normalizedValues = attributes.reduce((obj, attr) => {
+            const { min, max } = attributeRanges.find(r => r.attr === attr);
+            obj[attr] = (values[attr] - min) / (max - min || 1); // Avoid division by zero
+            return obj;
+        }, {});
+        return [month, normalizedValues];
+    });
+
+    const months = normalizedData.map(([month]) => month);
+
+    const colorScale = d3.scaleSequential(d3.interpolateViridis).domain([0, 1]);
+
+    const xScale = d3.scaleBand()
+        .domain(months)
+        .range([0, width])
+        .padding(0.05);
+
+    const yScale = d3.scaleBand()
+        .domain(attributes)
+        .range([0, height])
+        .padding(0.05);
+
+    // X-Axis
+    chart.append("g")
+        .attr("transform", `translate(0, ${height})`)
+        .call(d3.axisBottom(xScale).tickSize(0))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("transform", "rotate(-45)")
+        .style("font-size", "12px")
+        .attr("fill", "white");
+
+    // Y-Axis
+    chart.append("g")
+        .call(d3.axisLeft(yScale).tickSize(0))
+        .selectAll("text")
+        .style("font-size", "12px")
+        .attr("fill", "white");
+
+    // Heatmap cells
+    const cellData = normalizedData.flatMap(([month, values]) =>
+        attributes.map(attr => ({
+            month,
+            attribute: attr,
+            value: values[attr],
+        }))
+    );
+
+    chart.selectAll("rect")
+        .data(cellData)
+        .enter()
+        .append("rect")
+        .attr("x", d => xScale(d.month))
+        .attr("y", d => yScale(d.attribute))
+        .attr("width", xScale.bandwidth())
+        .attr("height", yScale.bandwidth())
+        .attr("fill", d => colorScale(d.value))
+        .append("title") // Tooltip
+        .text(d => `Month: ${d.month}\nAttribute: ${d.attribute}\nValue: ${d.value.toFixed(2)}`);
+
+    // Add color legend
+    const legendWidth = 300;
+    const legendHeight = 20;
+
+    const legend = svg.append("g")
+        .attr("transform", `translate(${margin.left + width / 2 - legendWidth / 2}, ${svgHeight - 50})`);
+
+    const legendScale = d3.scaleLinear()
+        .domain([0, 1])
+        .range([0, legendWidth]);
+
+    const legendAxis = d3.axisBottom(legendScale).ticks(5);
+
+    const gradientId = "heatmap-gradient";
+    svg.append("defs")
+        .append("linearGradient")
+        .attr("id", gradientId)
+        .selectAll("stop")
+        .data(d3.range(0, 1.1, 0.1).map(t => ({
+            offset: `${t * 100}%`,
+            color: colorScale(t),
+        })))
+        .enter()
+        .append("stop")
+        .attr("offset", d => d.offset)
+        .attr("stop-color", d => d.color);
+
+    legend.append("rect")
+        .attr("width", legendWidth)
+        .attr("height", legendHeight)
+        .style("fill", `url(#${gradientId})`);
+
+    legend.append("g")
+        .attr("transform", `translate(0, ${legendHeight})`)
+        .call(legendAxis)
+        .selectAll("text")
+        .style("font-size", "12px")
+        .attr("fill", "white");
+
+    // Title
+    svg.append("text")
+        .attr("x", svgWidth / 2)
+        .attr("y", margin.top / 2)
+        .attr("text-anchor", "middle")
+        .attr("fill", "white")
+        .style("font-size", "18px")
+        .style("font-weight", "bold")
+        .text("Monthly Attribute Analysis (Normalized)");
 }
 
 
@@ -891,6 +1095,8 @@ function loadCountryDataFiles(country, startDate, endDate) {
         console.log("Loaded Data:", combinedData);
 
         ctx.chartData = combinedData;
+        updateSongPlot();
+        updateAttributeAnalysis();
         updateArtistPlot();
     });
 }
