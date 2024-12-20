@@ -9,7 +9,6 @@ body {
 }
 
 .container {
-    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -45,7 +44,7 @@ header h1 {
 }
 
 .time-slider input[type="range"] {
-    width: 300px;
+    width: 200px;
     margin: 0 10px;
 }
 /* Time slider container */
@@ -176,12 +175,12 @@ header h1 {
     font-weight: bold;
 }
 
-#artistDropdown {
+.dropdown {
     padding: 5px;
     font-size: 14px;
 }
 
-#addArtistButton {
+.addButton {
     padding: 5px 10px;
     font-size: 14px;
     background-color: #1DB954;
@@ -191,12 +190,12 @@ header h1 {
     border-radius: 4px;
 }
 
-#addArtistButton:disabled {
+.addButton:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
 
-#artistListContainer {
+.listContainer {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -244,7 +243,7 @@ header h1 {
 /* Right Panel: Plot */
 .artist-right-panel {
     width: 80%;
-    background-color: #414141;
+    background-color: #1f1f1f;
     border: 1px solid #cacaca;
     border-radius: 8px;
     padding: 10px;

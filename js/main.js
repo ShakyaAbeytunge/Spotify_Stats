@@ -12,8 +12,21 @@ const ctx = {
         "Turkey", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", 
         "Uruguay", "Vietnam"
     ],
-    maxArtists: 10,// Maximum artists to be added
+    colorPallette: [
+        "#2c7fb8",  // Blue
+        "#4eb3d3",  // Light Blue
+        "#b2f25c",  // Pale Green
+        "#ffdc1b",  // Yellow
+        "#f1e303",  // Bright Yellow
+        "#a1d48f",  // Light Greenish
+        "#66c2a4",  // Green
+        "#99d84e",  // Yellow-Green
+        "#ffbf00",  // Yellow-Orange
+        "#d9ed00"   // Yellow-Greenish
+    ],
+    maxOptions: 10,// Maximum artists to be added
     addedArtists: new Set(),
+    addedSongs: new Set(),
     artistSongs: {},
     songData: [],
     chartData: []
@@ -29,6 +42,7 @@ function createViz() {
 function loadSongData(csvFilePath) {
     d3.csv(csvFilePath).then(data => {
         ctx.songData = data; // Store the entire CSV data in a global variable
+        initializePlots();
     }).catch(error => {
         console.error("Error loading song data:", error);
     });
@@ -73,7 +87,11 @@ function handleFilterChange(selectedCountry, startDate, endDate) {
 
     // Load data for the selected country and date range
     loadCountryDataFiles(selectedCountry, startDate, endDate);
-    updateArtistPlot();
+    if (this.dataset.tab === "artist-analysis") {
+        updateArtistPlot();
+    } else if (this.dataset.tab === "song-analysis"){
+        updateSongPlot();
+    }
 }
 
 const sliderWidth = 600; // Width of the slider in pixels
@@ -167,6 +185,7 @@ function updateRange() {
 updateRange();
 
 let isArtistDropdownInitialized = false
+let isSongDropdownInitialized = false
 // Handle tab switching
 const tabs = document.querySelectorAll(".tab-button");
 const plots = document.querySelectorAll(".plot");
@@ -185,28 +204,23 @@ tabs.forEach((tab) => {
         if (this.dataset.tab === "artist-analysis" && !isArtistDropdownInitialized) {
             createArtistDropdown("../data/top_artists.csv");
             isArtistDropdownInitialized = true; // Prevent re-initialization
+        } else if (this.dataset.tab === "song-analysis" && !isSongDropdownInitialized){
+            createSongDropdown("../data/top_5000_tracks.csv");
+            isSongDropdownInitialized = true
         }
     });
 });
 
 // D3.js for plotting
-function createDummyPlots() {
-    const songAnalysis = d3.select("#song-analysis");
+function initializePlots() {
+    // const songAnalysis = d3.select("#song-analysis");
     const genreAnalysis = d3.select("#genre-analysis");
-    // const artistAnalysis = d3.select("#artist-analysis");
-
-    // Example dummy plot
-    songAnalysis.append("svg")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .append("text")
-        .attr("x", "50%")
-        .attr("y", "50%")
-        .attr("text-anchor", "middle")
-        .style("fill", "#1DB954")
-        .style("font-size", "24px")
-        .text("Song Analysis Chart Placeholder");
-
+    
+    
+    createSongDropdown("../data/top_5000_tracks.csv");
+    isSongDropdownInitialized = true; // Prevent re-initialization
+    
+    
     genreAnalysis.append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
@@ -218,20 +232,312 @@ function createDummyPlots() {
         .style("font-size", "24px")
         .text("Genre Analysis Chart Placeholder");
 
-    // artistAnalysis.append("svg")
-    //     .attr("width", "100%")
-    //     .attr("height", "100%")
-    //     .append("text")
-    //     .attr("x", "50%")
-    //     .attr("y", "50%")
-    //     .attr("text-anchor", "middle")
-    //     .style("fill", "#1DB954")
-    //     .style("font-size", "24px")
-    //     .text("Artist Analysis Chart Placeholder");
 }
 
-// Call the function to create dummy plots
-createDummyPlots();
+// // Call the function to intialization
+// initializePlots();
+
+function sanitizeClassName(name) {
+    return name.replace(/[^\w-]/g, '_'); // Replace invalid characters with "_"
+}
+
+
+function createSongDropdown(csvFilePath) {
+
+    const container = d3.select("#song-analysis")
+        .append("div")
+        .attr("class", "artist-container");
+
+    const leftPanel = container.append("div")
+        .attr("class", "artist-left-panel");
+
+    leftPanel.append("label")
+        .attr("for", "songDropdown")
+        .text("Select Songs: ");
+
+    const dropdown = leftPanel.append("select")
+        .attr("id", "songDropdown")
+        .attr("class", "dropdown");
+
+    dropdown.append("option")
+        .attr("value", "")
+        .attr("disabled", true)
+        .attr("selected", true)
+        .text("Select a song...");
+
+    const addButton = leftPanel.append("button")
+        .attr("class", "addButton")
+        .text("Add Song");
+
+    const songListContainer = leftPanel.append("div")
+        .attr("class", "listContainer");
+
+    const rightPanel = container.append("div")
+        .attr("class", "artist-right-panel")
+        .attr("id", "song-plot");
+
+    d3.csv(csvFilePath).then(data => {
+        dropdown.selectAll("option.song-option")
+            .data(data)
+            .enter()
+            .append("option")
+            .attr("class", "song-option")
+            .attr("value", d => d.track_id)
+            .text(d => d.song_with_artist);
+
+            console.log("song drop down");
+    }).catch(error => {
+        console.error("Error loading CSV file:", error);
+    });
+
+    function renderSongList() {
+        songListContainer.html(""); // Clear existing list
+
+        ctx.addedSongs.forEach(songKey => {
+            const song = songKey.split('-').slice(1).join('-');  // Split the key into id and name
+            const tag = songListContainer.append("div")
+                .attr("class", "artist-tag")
+                .text(song);
+
+            tag.append("span")
+                .attr("class", "remove-tag")
+                .text("X")
+                .on("click", () => removeSong(songKey));  // Use songKey to remove
+        });
+
+        updateButtonState();
+    }
+
+    function addSong() {
+        const selectedSongId = dropdown.node().value;
+        const selectedSongName = dropdown.node().options[dropdown.node().selectedIndex].text;
+
+        if (selectedSongId && !ctx.addedSongs.has(`${selectedSongId}-${selectedSongName}`)) {
+            if (ctx.addedSongs.size < ctx.maxOptions) {
+                ctx.addedSongs.add(`${selectedSongId}-${selectedSongName}`);
+                renderSongList();
+                updateSongPlot();
+            }
+        }
+    }
+
+    function removeSong(songKey) {
+        ctx.addedSongs.delete(songKey);  // Remove using the correct key
+        renderSongList();
+        updateSongPlot();
+    }
+
+    function updateButtonState() {
+        if (ctx.addedSongs.size >= ctx.maxOptions) {
+            addButton.attr("disabled", true).style("background-color", "#ccc");
+        } else {
+            addButton.attr("disabled", null).style("background-color", null);
+        }
+    }
+
+    addButton.on("click", addSong);
+}
+
+function updateSongPlot() {
+    console.log("ctx.addedSongs (Set):", ctx.addedSongs); // Debugging
+
+    const addedSongsArray = Array.from(ctx.addedSongs);
+
+    if (addedSongsArray.length === 0) {
+        console.error("No songs selected in ctx.addedSongs.");
+        return;
+    }
+
+    const svgWidth = 1150;
+    const svgHeight = 450;
+    const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+    const width = svgWidth - margin.left - margin.right;
+    const height = svgHeight - margin.top - margin.bottom;
+
+    // Clear existing plots
+    d3.select("#song-plot").selectAll("*").remove();
+
+    // Prepare SVG container
+    const svg = d3.select("#song-plot")
+        .append("svg")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight);
+
+    const chart = svg.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Define a color scale for the songs
+    const colorScale = d3.scaleOrdinal()
+        .domain(addedSongsArray)
+        .range(ctx.colorPallette);
+
+    // Prepare the aggregated data for each song
+    const allAggregatedData = addedSongsArray.map(song => {
+        const songId = song.split('-')[0];  // Remove the artist part (assuming 'song - artist' format)
+        const songData = ctx.chartData.filter(d => d.track_id === songId);
+
+        const aggregatedData = d3.rollups(
+            songData,
+            v => d3.min(v, d => +d.rank),  // Get the rank for each date
+            d => d.date
+        ).map(([date, rank]) => ({ date: new Date(date), rank, song }));
+
+        return aggregatedData;
+    }).flat();
+
+    const xScale = d3.scaleTime()
+        .domain(d3.extent(allAggregatedData, d => d.date))
+        .range([0, width]);
+
+    const yScale = d3.scaleLinear()
+        .domain([0, d3.max(allAggregatedData, d => d.rank)])
+        .range([height, 0]);
+
+    // Define a clip path to prevent overflow
+    chart.append("defs")
+        .append("clipPath")
+        .attr("id", "clip")
+        .append("rect")
+        .attr("width", width)
+        .attr("height", height);
+
+    // Group content under clip path
+    const content = chart.append("g")
+        .attr("clip-path", "url(#clip)");
+
+    // X-Axis
+    const xAxis = chart.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.timeFormat("%b %Y")));
+
+    // X-Axis Label
+    chart.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + 40)
+        .attr("fill", "white")
+        .style("font-size", "14px")
+        .style("text-anchor", "middle")
+        .text("Time");
+
+    // Y-Axis
+    const yAxis = chart.append("g")
+        .call(d3.axisLeft(yScale).ticks(5));
+
+    // Y-Axis Label
+    chart.append("text")
+        .attr("x", -height / 2)
+        .attr("y", -40)
+        .attr("fill", "white")
+        .style("font-size", "14px")
+        .style("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .text("Rank Score");
+
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", margin.top / 2)
+        .attr("text-anchor", "middle")
+        .attr("fill", "white")
+        .style("font-size", "18px")
+        .style("font-weight", "bold")
+        .text("Rank of Songs Over Time");
+
+    const line = d3.line()
+        .x(d => xScale(d.date))
+        .y(d => yScale(d.rank));
+
+    const songGroups = d3.groups(allAggregatedData, d => d.song);
+
+    songGroups.forEach(([song, data]) => {
+        const path = content.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", colorScale(song))
+            .attr("stroke-width", 2)
+            .attr("class", `line-${sanitizeClassName(song)}`)
+            .attr("d", line);
+
+        const totalLength = path.node().getTotalLength();
+
+        path
+            .attr("stroke-dasharray", `${totalLength} ${totalLength}`)
+            .attr("stroke-dashoffset", totalLength)
+            .transition()
+            .duration(2000)
+            .ease(d3.easeLinear)
+            .attr("stroke-dashoffset", 0);
+
+        content.selectAll(`.circle-${sanitizeClassName(song)}`)
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", d => xScale(d.date))
+            .attr("cy", d => yScale(d.rank))
+            .attr("r", 3)
+            .attr("fill", colorScale(song))
+            .style("opacity", 0.8)
+            .attr("class", `circle-${sanitizeClassName(song)}`)
+            .append("title")
+            .text(d => `Song: ${song.split('-').slice(1).join('-')}\nDate: ${d3.timeFormat("%b %d, %Y")(d.date)}\nRank Score: ${d.rank}`);        
+    });
+
+    const legendX = width + margin.left - 200; // Adjust for legend width
+    const legendY = svgHeight - margin.bottom - (addedSongsArray.length * 30) - 10; // Adjust for legend height
+
+    const legend = svg.append("g")
+        .attr("transform", `translate(${legendX}, ${legendY})`);
+
+    addedSongsArray.forEach((song, index) => {
+        const legendItem = legend.append("g")
+            .attr("transform", `translate(0, ${index * 30})`)
+            .style("cursor", "pointer")
+            .on("click", function () {
+                const active = d3.select(this).classed("disabled");
+                const lineClass = `.line-${sanitizeClassName(song)}`;
+                const circleClass = `.circle-${sanitizeClassName(song)}`;
+            
+                d3.select(this).classed("disabled", !active);
+                d3.selectAll(lineClass).style("opacity", active ? 1 : 0.1);
+                d3.selectAll(circleClass).style("opacity", active ? 1 : 0.1);
+            
+                d3.select(this).select("text")
+                    .style("fill", active ? colorScale(song) : "gray");
+            });
+
+        legendItem.append("rect")
+            .attr("width", 20)
+            .attr("height", 20)
+            .attr("fill", colorScale(song));
+
+        legendItem.append("text")
+            .attr("x", 25)
+            .attr("y", 15)
+            .style("fill", colorScale(song))
+            .style("font-size", "10px") // Reduce font size
+            .style("font-family", "Arial, sans-serif")
+            .text(song.split('-').slice(1).join('-'));
+    });
+
+    // Zoom functionality
+    const zoom = d3.zoom()
+        .scaleExtent([1, 5])
+        .translateExtent([[0, 0], [width, height]])
+        .on("zoom", (event) => {
+            const newXScale = event.transform.rescaleX(xScale); // Rescale the x-axis
+
+            xAxis.call(d3.axisBottom(newXScale).ticks(5).tickFormat(d3.timeFormat("%b %Y")));
+
+            content.selectAll("path")
+                .attr("d", d => d3.line()
+                    .x(d => newXScale(d.date))
+                    .y(d => yScale(d.rank))(d));
+
+            content.selectAll("circle")
+                .attr("cx", d => newXScale(d.date));
+        });
+
+    svg.call(zoom);
+}
 
 function createArtistDropdown(csvFilePath) {
 
@@ -251,7 +557,8 @@ function createArtistDropdown(csvFilePath) {
 
     // Dropdown
     const dropdown = leftPanel.append("select")
-        .attr("id", "artistDropdown");
+        .attr("id", "artistDropdown")
+        .attr("class", "dropdown");
 
     dropdown.append("option")
         .attr("value", "")
@@ -261,12 +568,12 @@ function createArtistDropdown(csvFilePath) {
 
     // Add button
     const addButton = leftPanel.append("button")
-        .attr("id", "addArtistButton")
+        .attr("class", "addButton")
         .text("Add Artist");
 
     // Artist list container
     const artistListContainer = leftPanel.append("div")
-        .attr("id", "artistListContainer");
+        .attr("class", "listContainer");
 
     // Right section: Placeholder for plot
     const rightPanel = container.append("div")
@@ -313,7 +620,7 @@ function createArtistDropdown(csvFilePath) {
     function addArtist() {
         const selectedArtist = dropdown.node().value;
         if (selectedArtist && !ctx.addedArtists.has(selectedArtist)) {
-            if (ctx.addedArtists.size < ctx.maxArtists) {
+            if (ctx.addedArtists.size < ctx.maxOptions) {
                 ctx.addedArtists.add(selectedArtist);
                 // Find song_ids for this artist
                 const songIDs = ctx.songData
@@ -340,7 +647,7 @@ function createArtistDropdown(csvFilePath) {
 
     // Update the "Add" button state
     function updateButtonState() {
-        if (ctx.addedArtists.size >= ctx.maxArtists) {
+        if (ctx.addedArtists.size >= ctx.maxOptions) {
             addButton.attr("disabled", true).style("background-color", "#ccc");
         } else {
             addButton.attr("disabled", null).style("background-color", null);
@@ -354,18 +661,16 @@ function createArtistDropdown(csvFilePath) {
 function updateArtistPlot() {
     console.log("ctx.addedArtists (Set):", ctx.addedArtists); // Debugging
 
-    // Convert the Set to an Array
     const addedArtistsArray = Array.from(ctx.addedArtists);
 
-    // Ensure the array is not empty
     if (addedArtistsArray.length === 0) {
         console.error("No artists selected in ctx.addedArtists.");
-        return; // Stop the function if there are no artists
+        return;
     }
 
-    const svgWidth = 900; // Width of the chart
-    const svgHeight = 500; // Height of the chart
-    const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+    const svgWidth = 1150;
+    const svgHeight = 450;
+    const margin = { top: 50, right: 50, bottom: 50, left: 50 };
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
 
@@ -381,26 +686,23 @@ function updateArtistPlot() {
     const chart = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Color scale for artists
     const colorScale = d3.scaleOrdinal()
         .domain(addedArtistsArray)
-        .range(d3.schemeCategory10);
+        .range(ctx.colorPallette);
 
-    // Aggregate data for each artist
     const allAggregatedData = addedArtistsArray.map(artist => {
         const songIds = ctx.artistSongs[artist] || [];
         const artistData = ctx.chartData.filter(d => songIds.includes(d.track_id));
 
         const aggregatedData = d3.rollups(
             artistData,
-            v => d3.sum(v, d => +d.streams), // Sum stream counts
-            d => d.date // Group by date
+            v => d3.sum(v, d => +d.streams),
+            d => d.date
         ).map(([date, streams]) => ({ date: new Date(date), streams, artist }));
 
         return aggregatedData;
-    }).flat(); // Flatten into a single array
+    }).flat();
 
-    // Create scales
     const xScale = d3.scaleTime()
         .domain(d3.extent(allAggregatedData, d => d.date))
         .range([0, width]);
@@ -409,15 +711,55 @@ function updateArtistPlot() {
         .domain([0, d3.max(allAggregatedData, d => d.streams)])
         .range([height, 0]);
 
-    // Add axes
-    chart.append("g")
+    // Define a clip path to prevent overflow
+    chart.append("defs")
+        .append("clipPath")
+        .attr("id", "clip")
+        .append("rect")
+        .attr("width", width)
+        .attr("height", height);
+
+    // Group content under clip path
+    const content = chart.append("g")
+        .attr("clip-path", "url(#clip)");
+
+    // X-Axis
+    const xAxis = chart.append("g")
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.timeFormat("%b %Y")));
 
-    chart.append("g")
-        .call(d3.axisLeft(yScale).ticks(5));
+    // X-Axis Label
+    chart.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + 40)
+        .attr("fill", "white")
+        .style("font-size", "14px")
+        .style("text-anchor", "middle")
+        .text("Time");
 
-    // Add line paths for each artist
+    // Y-Axis
+    const yAxis = chart.append("g")
+        .call(d3.axisLeft(yScale).tickFormat(d => `${d / 1000}k`));
+
+    // Y-Axis Label
+    chart.append("text")
+        .attr("x", -height / 2)
+        .attr("y", -40)
+        .attr("fill", "white")
+        .style("font-size", "14px")
+        .style("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .text("Total Stream Count");
+
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", margin.top / 2)
+        .attr("text-anchor", "middle")
+        .attr("fill", "white")
+        .style("font-size", "18px")
+        .style("font-weight", "bold")
+        .text("Streams of Top 200 Songs by Artists");
+
     const line = d3.line()
         .x(d => xScale(d.date))
         .y(d => yScale(d.streams));
@@ -425,12 +767,12 @@ function updateArtistPlot() {
     const artistGroups = d3.groups(allAggregatedData, d => d.artist);
 
     artistGroups.forEach(([artist, data]) => {
-        // Add the line with a smooth transition
-        const path = chart.append("path")
+        const path = content.append("path")
             .datum(data)
             .attr("fill", "none")
             .attr("stroke", colorScale(artist))
             .attr("stroke-width", 2)
+            .attr("class", `line-${artist.replace(/\s+/g, "")}`)
             .attr("d", line);
 
         const totalLength = path.node().getTotalLength();
@@ -439,37 +781,80 @@ function updateArtistPlot() {
             .attr("stroke-dasharray", `${totalLength} ${totalLength}`)
             .attr("stroke-dashoffset", totalLength)
             .transition()
-            .duration(2000) // Animation duration (2 seconds)
-            .ease(d3.easeLinear) // Linear easing for smooth effect
+            .duration(2000)
+            .ease(d3.easeLinear)
             .attr("stroke-dashoffset", 0);
-    });    
 
-    // Add the legend inside the chart area, at the top-right corner
-    const legend = svg.append("g")
-        .attr("transform", `translate(${width - 120}, ${margin.top})`); // Adjust position
-
-    addedArtistsArray.forEach((artist, i) => {
-        const legendGroup = legend.append("g")
-            .attr("transform", `translate(0, ${i * 20})`); // Adjust spacing between legend items
-
-        // Add colored rectangle for each artist
-        legendGroup.append("rect")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr("width", 15)
-            .attr("height", 15)
-            .attr("fill", colorScale(artist)); // Use the color scale for each artist
-
-        // Add the artist name next to the colored rectangle
-        legendGroup.append("text")
-            .attr("x", 20) // Position text next to the rectangle
-            .attr("y", 12)
-            .text(artist)
-            .style("font-size", "12px")
-            .attr("text-anchor", "start");
+        content.selectAll(`circle-${artist.replace(/\s+/g, "")}`)
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", d => xScale(d.date))
+            .attr("cy", d => yScale(d.streams))
+            .attr("r", 3)
+            .attr("fill", colorScale(artist))
+            .style("opacity", 0.8)
+            .attr("class", `circle-${artist.replace(/\s+/g, "")}`)
+            .append("title")
+            .text(d => `Artist: ${artist}\nDate: ${d3.timeFormat("%b %d, %Y")(d.date)}\nStreams: ${d.streams}`);
     });
 
+    const legendX = width + margin.left - 150; // Adjust for legend width
+    const legendY = svgHeight - margin.bottom - (addedSongsArray.length * 30) - 10; // Adjust for legend height
+
+    const legend = svg.append("g")
+        .attr("transform", `translate(${legendX}, ${legendY})`);
+
+    addedArtistsArray.forEach((artist, index) => {
+        const legendItem = legend.append("g")
+            .attr("transform", `translate(0, ${index * 30})`)
+            .style("cursor", "pointer")
+            .on("click", function () {
+                const active = d3.select(this).classed("disabled");
+                const lineClass = `.line-${artist.replace(/\s+/g, "")}`;
+                const circleClass = `.circle-${artist.replace(/\s+/g, "")}`;
+
+                d3.select(this).classed("disabled", !active);
+                d3.selectAll(lineClass).style("opacity", active ? 1 : 0.1);
+                d3.selectAll(circleClass).style("opacity", active ? 1 : 0.1);
+
+                d3.select(this).select("text")
+                    .style("fill", active ? colorScale(artist) : "gray");
+            });
+
+        legendItem.append("rect")
+            .attr("width", 20)
+            .attr("height", 20)
+            .attr("fill", colorScale(artist));
+
+        legendItem.append("text")
+            .attr("x", 25)
+            .attr("y", 15)
+            .style("fill", colorScale(artist))
+            .text(artist);
+    });
+
+    const zoom = d3.zoom()
+        .scaleExtent([1, 5])
+        .translateExtent([[0, 0], [width, height]])
+        .on("zoom", (event) => {
+            const newXScale = event.transform.rescaleX(xScale); // Rescale the x-axis
+
+            xAxis.call(d3.axisBottom(newXScale).ticks(5).tickFormat(d3.timeFormat("%b %Y")));
+
+            content.selectAll("path")
+                .attr("d", d => d3.line()
+                    .x(d => newXScale(d.date))
+                    .y(d => yScale(d.streams))(d));
+
+            content.selectAll("circle")
+                .attr("cx", d => newXScale(d.date));
+        });
+
+    svg.call(zoom);
 }
+
+
 
 function loadCountryDataFiles(country, startDate, endDate) {
     const filesToLoad = [];

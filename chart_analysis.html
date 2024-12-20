@@ -5,17 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spotify Chart Analysis</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/d3.v7.min.js"></script>
 </head>
 <body onload="createViz()">
     <div class="container">
         <!-- Header -->
-        <header>
-            <h1>Spotify Chart Analysis</h1>
-        </header>
+        
 
         <!-- Controls -->
         <div class="controls">
+            <header>
+                <h1>Spotify  Top200 Charts</h1>
+            </header>
             <div class="selector">
                 <label for="country-list">Select Country:</label>
                 <select id="country-list" onload="updateSonglist()">
